@@ -3,6 +3,8 @@ package com.web;
 /**
  * Created by flyboss on 2018/4/28.
  */
+import com.Search.Search;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -23,6 +25,7 @@ public class HelloWorld extends HttpServlet {
 
         //设置逻辑实现
         PrintWriter out = resp.getWriter();
-        out.println("<h1>" + "hello" + "</h1>");
+        Search search = new Search();
+        out.println("<h1>" + search.helloWorld() + "</h1>");
     }
 }

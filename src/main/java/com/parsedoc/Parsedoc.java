@@ -30,6 +30,11 @@ public class Parsedoc {
         Parsedoc parsedoc = new Parsedoc();
 
         DaoUtil.truncateTable("doc");
+        DaoUtil.truncateTable("api_index_comment");
+        DaoUtil.truncateTable("api_index_comment_doc");
+        DaoUtil.truncateTable("api_index_name");
+        DaoUtil.truncateTable("api_index_name_doc");
+
         ParseDocUtil parseDocUtil = new ParseDocUtil();
         List<String> list = parseDocUtil.get();
         for (String s : list) {
@@ -37,10 +42,6 @@ public class Parsedoc {
             parsedoc.parse(s);
         }
 
-        DaoUtil.truncateTable("api_index_comment");
-        DaoUtil.truncateTable("api_index_comment_doc");
-        DaoUtil.truncateTable("api_index_name");
-        DaoUtil.truncateTable("api_index_name_doc");
         parsedoc.calculateApiIndexNameIDF();
         parsedoc.calculateApiIndexCommentIDF();
         parsedoc.countNameVectorLength();

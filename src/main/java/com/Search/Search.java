@@ -23,6 +23,10 @@ public class Search {
         search.run();
     }
 
+    public String helloWorld(){
+        return "Hello web";
+    }
+
     public void run(){
         Scanner scanner = new Scanner(System.in);
         String searchSentence = scanner.nextLine();

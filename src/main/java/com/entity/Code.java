@@ -41,6 +41,9 @@ public class Code {
     @Column(name = "filepath")
     private String filepath;
 
+    @Column(name = "webpath")
+    private String webpath;
+
     @Column(name = "search_Name")
     private String searchName;
 
@@ -176,6 +179,14 @@ public class Code {
 
     public void setDoc(String doc) {
         this.doc = doc;
+    }
+
+    public String getWebpath() {
+        return webpath;
+    }
+
+    public void setWebpath(String webpath) {
+        this.webpath = webpath;
     }
 
     @Override
