@@ -41,8 +41,8 @@ public class Code {
     @Column(name = "filepath")
     private String filepath;
 
-    @Column(name = "webpath")
-    private String webpath;
+    @Column(name = "url")
+    private String url;
 
     @Column(name = "search_Name")
     private String searchName;
@@ -62,7 +62,7 @@ public class Code {
     public Code() {
     }
 
-    public Code(String codePackage, String codeClass, String originName, Integer startline, Integer endline, String originBody, String filepath, String doc, Set<Doc> docs) {
+    public Code(String codePackage, String codeClass, String originName, Integer startline, Integer endline, String originBody, String filepath, String doc, Set<Doc> docs,String url) {
         this.codePackage = codePackage;
         this.codeClass = codeClass;
         this.originName = originName;
@@ -75,6 +75,7 @@ public class Code {
         this.fullName=codePackage+"."+codeClass+"."+originName;
         this.searchName =StringUtil.preDispose(this.fullName);
         this.searchBody = StringUtil.preDispose(this.doc+" "+this.originBody);
+        this.url=url;
     }
 
     public Integer getId() {
@@ -181,12 +182,12 @@ public class Code {
         this.doc = doc;
     }
 
-    public String getWebpath() {
-        return webpath;
+    public String getUrl() {
+        return url;
     }
 
-    public void setWebpath(String webpath) {
-        this.webpath = webpath;
+    public void setUrl(String webpath) {
+        this.url = webpath;
     }
 
     @Override

@@ -27,14 +27,16 @@ public class CodeVisitor extends ASTVisitor {
     private String filePath;
     private CompilationUnit compilationUnit;
     private String[] fileContent;
+    private String baseUrl;
 
 
-    public void setCodeVisitor(String packageName, String className, String filePath, CompilationUnit compilationUnit, String fileContent) {
+    public void setCodeVisitor(String packageName, String className, String filePath, CompilationUnit compilationUnit, String fileContent,String baseUrl) {
         this.packageName = packageName;
         this.className = className;
         this.filePath = filePath;
         this.compilationUnit = compilationUnit;
         this.fileContent = fileContent.split("\n");
+        this.baseUrl=baseUrl;
         System.out.println("\n" + filePath);
     }
 
@@ -72,8 +74,10 @@ public class CodeVisitor extends ASTVisitor {
         if (doc.length() + originBody.length() > 1000) {
             return;
         }
+        String temp=filePath.replaceFirst("F:/codewarehouse/","");
+        String url=baseUrl+temp.substring(temp.indexOf("/")+1).replaceAll("\\\\","/");
 
-        Code code = new Code(packageName, className, methodName, starline, endline, originBody, filePath, doc, docs);
+        Code code = new Code(packageName, className, methodName, starline, endline, originBody, filePath, doc, docs,url);
         CodeDao codeDao = new CodeDao();
         codeDao.add(code);
 

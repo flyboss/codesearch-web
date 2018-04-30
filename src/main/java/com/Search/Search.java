@@ -27,7 +27,7 @@ public class Search {
         return "Hello web";
     }
 
-    public void run(){
+    public List<Code> run(){
         Scanner scanner = new Scanner(System.in);
         String searchSentence = scanner.nextLine();
         String searchWords = disposeSearchWord(searchSentence);
@@ -39,8 +39,9 @@ public class Search {
         Map<Integer,Double> apiText = apiCommentSearch.vsm(searchWords);
 
         Map<Integer, Double> apiRevevant = getApiRelevant(apiName, apiText);
-        Queue<FuncValue> queue=beginBooleanModel(apiRevevant,searchWords);
-        int i=0;
+        List<Code> queue=beginBooleanModel(apiRevevant,searchWords);
+        return queue;
+
     }
 
     private String disposeSearchWord(String seachWord){
@@ -72,7 +73,7 @@ public class Search {
         return SearchUtil.sortByValue(apiRelevant);
     }
 
-    private Queue<FuncValue> beginBooleanModel(Map<Integer, Double> apiRevevant,String searchWords){
+    private List<Code> beginBooleanModel(Map<Integer, Double> apiRevevant,String searchWords){
         DocDao docDao = new DocDao();
         FuncIndexDao funcIndexDao = new FuncIndexDao();
         FuncIndexCodeDao funcIndexCodeDao = new FuncIndexCodeDao();
@@ -103,7 +104,11 @@ public class Search {
                 funcValues.offer(new FuncValue(code, funcValue));
             }
         }
-        return funcValues;
+        List<Code> codes = new ArrayList<>();
+        for (FuncValue f :funcValues) {
+            codes.add(f.code);
+        }
+        return codes;
     }
 
     private String[] deleteApiWords(String[] docSearchname,String[] searchWords){

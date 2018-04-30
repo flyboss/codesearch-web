@@ -1,6 +1,9 @@
 package com.parsecode;
 
 import com.dao.DaoUtil;
+import com.dao.ProjectDao;
+import com.entity.Project;
+import com.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Git;
@@ -9,6 +12,8 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,69 +29,55 @@ public class CodeProject {
     private static final String javaUrl = "https://github.com/topics/java";
     public static void main(String[] args) {
         CodeProject codeProject = new CodeProject();
-//        DaoUtil.truncateTable("code");
-//        DaoUtil.truncateTable("code_doc");
-//        DaoUtil.truncateTable("func_index");
-//        DaoUtil.truncateTable("func_index_code");
-//
-//        List<File> files=codeProject.getFilesFromProject(projectRootPath);
-//
-//        ParseCode parseCode = new ParseCode();
-//        for (File file : files) {
-//            parseCode.run(file.getAbsolutePath());
-//        }
-        codeProject.pullBranchToLocal("https://github.com/iluwatar/java-design-patterns.git");
+        codeProject.crawlProject();
     }
 
-    //TODO 获得准确的非test java文件
-    public List<File> getFilesFromProject(String projectPath){
-        Queue<File> folders = new LinkedList<File>();
-        List<File> javaFiles = new ArrayList<File>();
-        folders.offer(new File(projectPath));
-        while (folders.size() != 0) {
-            File folder = folders.poll();
-            File[] files = folder.listFiles();
-            for (File file : files) {
-                if(file.isDirectory()){
-                    if (!file.getName().contains("test")){
-                        folders.offer(file);
-                    }
-                }else if (file.getName().endsWith(".java")){
-                    javaFiles.add(file);
-                }
-            }
+
+
+    public void pullBranchToLocal(String remoteURL,String branch){
+        String projectName = remoteURL.substring(remoteURL.lastIndexOf("/")+1);
+        ProjectDao projectDao = new ProjectDao();
+        if(projectDao.find(projectName)!=null){
+            return;
         }
-        return javaFiles;
-    }
 
-    public void pullBranchToLocal(String remoteURL){
-        String projectName = remoteURL.substring(remoteURL.lastIndexOf("/")+1, remoteURL.lastIndexOf("."));
         File localPath = new File(projectRootPath+projectName);
         if (localPath.exists()){
-            logger.error(projectName+" exists");
+            System.out.println(localPath+" exist");
+            logger.error(localPath+" exist");
         }else{
             if (localPath.mkdir()){
-                System.out.println(localPath+" success");
+                System.out.println(localPath+" mkdir");
+                logger.warn(localPath+" mkdir");
             }
         }
         try {
             Git result = Git.cloneRepository()
-                    .setURI(remoteURL)
+                    .setURI(remoteURL+".git")
                     .setDirectory(localPath)
                     .call();
-            logger.info("download "+projectName+" succeed");
+            System.out.println(projectName+" succeed");
+            Project project=new Project(projectName,remoteURL+"/tree/"+branch+"/",projectRootPath+projectName);
+            projectDao.add(project);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error(e);
-            logger.error("download "+projectName+" fail");
+            System.out.println(projectName +" fail");
         }
     }
 
     private void crawlProject(){
-        final String baseUrl="https://github.com/";
+        final String githubJava="/github.html";
         try {
-            Document doc = Jsoup.connect(javaUrl).get();
-        } catch (IOException e) {
+            File file = new File(this.getClass().getResource(githubJava).getPath());
+            Document doc = Jsoup.parse(file, "UTF-8", "https://github.com/");
+            Elements articles = doc.select("article");
+            for (int i = 0; i < 10; i++) {
+                String projectUrl=articles.get(i).child(0).child(0).child(0).absUrl("href");
+                Document project = Jsoup.connect(projectUrl).get();
+                String branch=project.getElementById("js-repo-pjax-container").child(1).child(0).child(4).child(2).child(0).child(1).text();
+                pullBranchToLocal(projectUrl,branch);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

@@ -1,9 +1,11 @@
 package com.parsecode;
 
 import java.io.*;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
+import com.dao.DaoUtil;
+import com.dao.ProjectDao;
+import com.entity.Project;
 import org.eclipse.jdt.core.dom.*;
 
 /**
@@ -16,7 +18,29 @@ public class ParseCode {
     private CompilationUnit compilationUnit;
     private String fileContent;
 
-    public void run(String filepath) {
+    public static void main(String[] args) {
+        DaoUtil.truncateTable("code");
+        DaoUtil.truncateTable("code_doc");
+        DaoUtil.truncateTable("func_index");
+        DaoUtil.truncateTable("func_index_code");
+        ParseCode parseCode = new ParseCode();
+        parseCode.parsePoject();
+
+    }
+
+    public void parsePoject(){
+        ProjectDao projectDao=new ProjectDao();
+        List<Project> projects=projectDao.getAll();
+        for (Project project:projects) {
+            List<File> files=getFilesFromProject(project.getFilePath());
+            for (File file : files) {
+                run(file.getAbsolutePath(),project.getBaseUrl());
+            }
+        }
+
+    }
+
+    public void run(String filepath,String bastUrl) {
         this.filePath = filepath;
         compilationUnit = getAst();
         List types = compilationUnit.types();
@@ -34,10 +58,9 @@ public class ParseCode {
         System.out.println(className);
 
         CodeVisitor codeVisitor = new CodeVisitor();
-        codeVisitor.setCodeVisitor(packageName, className, filePath, compilationUnit, fileContent);
+        codeVisitor.setCodeVisitor(packageName, className, filePath, compilationUnit, fileContent,bastUrl);
         compilationUnit.accept(codeVisitor);
     }
-
 
     private boolean canSkip(TypeDeclaration typeDec) {
         ITypeBinding iTypeBinding = typeDec.resolveBinding();
@@ -84,6 +107,27 @@ public class ParseCode {
             e.printStackTrace();
             return null;
         }
+    }
+
+    //TODO 获得准确的非test java文件
+    private List<File> getFilesFromProject(String projectPath){
+        Queue<File> folders = new LinkedList<File>();
+        List<File> javaFiles = new ArrayList<File>();
+        folders.offer(new File(projectPath));
+        while (folders.size() != 0) {
+            File folder = folders.poll();
+            File[] files = folder.listFiles();
+            for (File file : files) {
+                if(file.isDirectory()){
+                    if (!file.getName().contains("test")){
+                        folders.offer(file);
+                    }
+                }else if (file.getName().endsWith(".java")){
+                    javaFiles.add(file);
+                }
+            }
+        }
+        return javaFiles;
     }
 
 //    private void parseMethod(TypeDeclaration typeDec, CompilationUnit compilationUnit) {

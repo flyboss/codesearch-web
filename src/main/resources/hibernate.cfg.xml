@@ -36,5 +36,6 @@
     <mapping class="com.entity.ApiIndexCommentDoc"/>
     <mapping class="com.entity.FuncIndex"/>
     <mapping class="com.entity.FuncIndexCode"/>
+    <mapping class="com.entity.Project"/>
   </session-factory>
 </hibernate-configuration>
