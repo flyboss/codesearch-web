@@ -32,11 +32,11 @@ public class ExtractIndex {
     private void buildIndex(Code code, String string, Boolean isName) {
         String[] strings = string.split(" ");
         Map<FuncIndex, Integer> tf = new HashMap<FuncIndex, Integer>();
-
         double maxTf = 1;
-
         for (String s : strings) {
             if (s==null||s.length()==0){
+                continue;
+            }else if (s.length()==1&&Character.isWhitespace(s.charAt(0))){
                 continue;
             }
             FuncIndex funcIndex = funcIndexDao.find(s);

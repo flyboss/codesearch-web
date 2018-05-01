@@ -71,11 +71,15 @@ public class CodeProject {
             File file = new File(this.getClass().getResource(githubJava).getPath());
             Document doc = Jsoup.parse(file, "UTF-8", "https://github.com/");
             Elements articles = doc.select("article");
-            for (int i = 0; i < 10; i++) {
-                String projectUrl=articles.get(i).child(0).child(0).child(0).absUrl("href");
-                Document project = Jsoup.connect(projectUrl).get();
-                String branch=project.getElementById("js-repo-pjax-container").child(1).child(0).child(4).child(2).child(0).child(1).text();
-                pullBranchToLocal(projectUrl,branch);
+            for (int i = 0; i < 100; i++) {
+                try{
+                    String projectUrl=articles.get(i).child(0).child(0).child(0).absUrl("href");
+                    Document project = Jsoup.connect(projectUrl).get();
+                    String branch=project.getElementById("js-repo-pjax-container").child(1).child(0).child(4).child(2).child(0).child(1).text();
+                    pullBranchToLocal(projectUrl,branch);
+                }catch (Exception e){
+                    logger.error(e);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

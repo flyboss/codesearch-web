@@ -6,6 +6,8 @@ import java.util.*;
 import com.dao.DaoUtil;
 import com.dao.ProjectDao;
 import com.entity.Project;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jdt.core.dom.*;
 
 /**
@@ -17,25 +19,30 @@ public class ParseCode {
     private String filePath;
     private CompilationUnit compilationUnit;
     private String fileContent;
-
+    private static Logger logger = LogManager.getLogger(ParseCode.class);
     public static void main(String[] args) {
-        DaoUtil.truncateTable("code");
-        DaoUtil.truncateTable("code_doc");
-        DaoUtil.truncateTable("func_index");
-        DaoUtil.truncateTable("func_index_code");
+//        DaoUtil.truncateTable("code");
+//        DaoUtil.truncateTable("code_doc");
+//        DaoUtil.truncateTable("func_index");
+//        DaoUtil.truncateTable("func_index_code");
         ParseCode parseCode = new ParseCode();
-        parseCode.parsePoject();
-
+        //parseCode.parsePoject();
+        parseCode.run("F:\\codewarehouse\\elasticsearch\\modules\\lang-painless\\src\\main\\java\\org\\elasticsearch\\painless\\node\\EBinary.java","https:");
     }
 
     public void parsePoject(){
         ProjectDao projectDao=new ProjectDao();
         List<Project> projects=projectDao.getAll();
         for (Project project:projects) {
+            if (project.isParse()){
+                continue;
+            }
             List<File> files=getFilesFromProject(project.getFilePath());
             for (File file : files) {
                 run(file.getAbsolutePath(),project.getBaseUrl());
             }
+            project.setParse(true);
+            projectDao.update(project);
         }
 
     }
@@ -52,10 +59,12 @@ public class ParseCode {
             return;
         }
 
-        packageName = compilationUnit.getPackage().getName().toString();
-        System.out.println(packageName);
+        try{
+            packageName = compilationUnit.getPackage().getName().toString();
+        } catch (Exception e){
+            logger.error(e);
+        }
         className = typeDec.getName().getFullyQualifiedName();
-        System.out.println(className);
 
         CodeVisitor codeVisitor = new CodeVisitor();
         codeVisitor.setCodeVisitor(packageName, className, filePath, compilationUnit, fileContent,bastUrl);

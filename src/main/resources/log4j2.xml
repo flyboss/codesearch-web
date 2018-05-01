@@ -12,7 +12,7 @@
     </Appenders>
 
     <Loggers>
-        <Root level="warn">
+        <Root level="info">
             <AppenderRef ref="FileAppender" />
             <AppenderRef ref="Console" />
         </Root>
