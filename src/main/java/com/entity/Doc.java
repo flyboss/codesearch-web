@@ -253,11 +253,11 @@ public class Doc {
 
         Doc doc = (Doc) o;
 
-        return getId() != null ? getId().equals(doc.getId()) : doc.getId() == null;
+        return getId().equals(doc.getId());
     }
 
     @Override
     public int hashCode() {
-        return getId() != null ? getId().hashCode() : 0;
+        return getId().hashCode();
     }
 }

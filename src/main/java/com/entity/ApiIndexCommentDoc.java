@@ -71,4 +71,19 @@ public class ApiIndexCommentDoc {
                 "id=" + id +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ApiIndexCommentDoc)) return false;
+
+        ApiIndexCommentDoc that = (ApiIndexCommentDoc) o;
+
+        return getId().equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
 }

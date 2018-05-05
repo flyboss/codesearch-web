@@ -80,12 +80,12 @@ public class ApiIndexName {
 
         ApiIndexName that = (ApiIndexName) o;
 
-        return getId() != null ? getId().equals(that.getId()) : that.getId() == null;
+        return getId().equals(that.getId());
     }
 
     @Override
     public int hashCode() {
-        return getId() != null ? getId().hashCode() : 0;
+        return getId().hashCode();
     }
 
     @Override

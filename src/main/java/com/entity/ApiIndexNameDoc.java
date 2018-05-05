@@ -75,11 +75,11 @@ public class ApiIndexNameDoc {
 
         ApiIndexNameDoc that = (ApiIndexNameDoc) o;
 
-        return id != null ? id.equals(that.id) : that.id == null;
+        return getId().equals(that.getId());
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        return getId().hashCode();
     }
 }

@@ -20,6 +20,10 @@ public class ApiNameSearch {
         return vsm(vector, vectors);
     }
 
+    /**
+     *
+     *
+     */
     private double[] generateVector(String searchSentence,List<ApiIndexName> searchApiIndexName){
         String[] searchWords =searchSentence.split(" ");
         Map<ApiIndexName, Integer> searchWordsCount = new HashMap<ApiIndexName, Integer>();

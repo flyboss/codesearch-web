@@ -64,4 +64,19 @@ public class ApiIndexComment {
     public void setApiIndexCommentDocs(Set<ApiIndexCommentDoc> apiIndexCommentDocs) {
         this.apiIndexCommentDocs = apiIndexCommentDocs;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ApiIndexComment)) return false;
+
+        ApiIndexComment that = (ApiIndexComment) o;
+
+        return getId().equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
 }
