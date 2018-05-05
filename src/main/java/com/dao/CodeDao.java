@@ -101,4 +101,20 @@ public class CodeDao {
     }
 
 
+    public long getCodeCount() {
+        Session session = null;
+        String hql="select count(*) FROM Code " ;
+        try {
+            session = Main.sessionFactory.openSession();
+            Query query = session.createQuery(hql);
+            long count=(long)query.getResultList().get(0);
+            return count;
+        } catch (Exception e) {
+            return 10000000000L;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
 }

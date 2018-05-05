@@ -73,4 +73,19 @@ public class FuncIndex {
     public void setFuncIndexCodes(Set<FuncIndexCode> funcIndexCodes) {
         this.funcIndexCodes = funcIndexCodes;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FuncIndex)) return false;
+
+        FuncIndex funcIndex = (FuncIndex) o;
+
+        return getId().equals(funcIndex.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
 }

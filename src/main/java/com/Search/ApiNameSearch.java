@@ -26,6 +26,9 @@ public class ApiNameSearch {
         ApiIndexNameDao apiIndexNameDao = new ApiIndexNameDao();
         for (String s: searchWords) {
             ApiIndexName apiIndexName=apiIndexNameDao.find(s);
+            if (apiIndexName==null){
+                continue;
+            }
             if (searchWordsCount.containsKey(apiIndexName)){
                 searchWordsCount.put(apiIndexName,searchWordsCount.get(apiIndexName)+1);
             }else {
@@ -35,10 +38,14 @@ public class ApiNameSearch {
         }
         double[] vector = new double[searchApiIndexName.size()];
         for (int i = 0; i< searchApiIndexName.size(); i++) {
-            double idf= searchApiIndexName.get(i).getIdf();
-            double counts=searchWordsCount.get(searchApiIndexName.get(i));
-            double tf=counts/searchWords.length;
-            vector[i] =tf*idf;
+            try {
+                double idf = searchApiIndexName.get(i).getIdf();
+                double counts = searchWordsCount.get(searchApiIndexName.get(i));
+                double tf = counts / searchWords.length;
+                vector[i] = tf * idf;
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
         return vector;
     }

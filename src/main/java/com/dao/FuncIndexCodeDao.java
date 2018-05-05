@@ -59,4 +59,22 @@ public class FuncIndexCodeDao {
             }
         }
     }
+
+    public List<Object[]> countIDF(boolean isName){
+        Session session = null;
+        String hql="select funcIndex.id,count(*) FROM FuncIndexCode where isName=:isName group by funcIndex" ;
+        try {
+            session = Main.sessionFactory.openSession();
+            Query query = session.createQuery(hql);
+            query.setParameter("isName",isName);
+            List<Object[]> objects = query.getResultList();
+            return objects;
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
 }

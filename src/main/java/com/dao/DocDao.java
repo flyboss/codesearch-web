@@ -10,7 +10,9 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by flyboss on 2018/4/1.
@@ -140,10 +142,20 @@ public class DocDao {
         Session session = null;
         try {
             session = Main.sessionFactory.openSession();
-            Query query = session.createQuery("select codes from Doc where id=:id");
+            Query query = session.createQuery("from Doc where id =:id");
             query.setParameter("id", id);
-            List<Code> codes = query.getResultList();
-            return codes;
+            List<Doc> docs = query.getResultList();
+            if (docs!=null){
+                Doc doc=docs.get(0);
+                Set<Code> codes=doc.getCodes();
+                List<Code> codeList = new ArrayList<>();
+                for (Code c:codes) {
+                    codeList.add(c);
+                }
+                return codeList;
+            }else {
+                return null;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return null;

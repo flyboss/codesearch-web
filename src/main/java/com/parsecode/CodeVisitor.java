@@ -28,7 +28,7 @@ public class CodeVisitor extends ASTVisitor {
     private CompilationUnit compilationUnit;
     private String[] fileContent;
     private String baseUrl;
-
+    private static ExtractIndex extractIndex = new ExtractIndex();
 
     public void setCodeVisitor(String packageName, String className, String filePath, CompilationUnit compilationUnit, String fileContent,String baseUrl) {
         this.packageName = packageName;
@@ -82,7 +82,6 @@ public class CodeVisitor extends ASTVisitor {
         CodeDao codeDao = new CodeDao();
         codeDao.add(code);
 
-        ExtractIndex extractIndex = new ExtractIndex();
         extractIndex.parseFunc(code);
     }
 
@@ -151,6 +150,11 @@ public class CodeVisitor extends ASTVisitor {
         }
     }
 
+    @Override
+    public boolean visit(AnonymousClassDeclaration classDeclarationStatement) {
+        return false;
+    }
+
     private String getMethodDoc(MethodDeclaration node) {
         Javadoc javadoc = node.getJavadoc();
         if (javadoc != null) {
@@ -158,20 +162,19 @@ public class CodeVisitor extends ASTVisitor {
         } else {
             return "";
         }
+
     }
 
     private int[] getMethodLength(MethodDeclaration node) {
-        int startline = compilationUnit.getLineNumber(node.getStartPosition());
-        int nodeLength = node.getLength();
-        int endline = compilationUnit.getLineNumber(node.getStartPosition() + nodeLength);
+        Block body=node.getBody();
+        int startline = compilationUnit.getLineNumber(body.getStartPosition());
+        int nodeLength = body.getLength();
+        int endline = compilationUnit.getLineNumber(body.getStartPosition() + nodeLength);
         System.out.println(startline + "  " + endline);
         return new int[]{startline, endline};
     }
 
     private String getContent(int startline, int endline) {
-        if (filePath.equals("F:\\codewarehouse\\fastjson\\src\\main\\java\\com\\alibaba\\fastjson\\JSONObject.java")) {
-            int j = 0;
-        }
         int firstline = startline - 1;
         //get the first non space char position
         int spaceNumber = fileContent[firstline].indexOf(fileContent[firstline].trim().charAt(0));

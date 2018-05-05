@@ -26,6 +26,9 @@ public class ApiCommentSearch {
         ApiIndexCommentDao apiIndexCommentDao = new ApiIndexCommentDao();
         for (String s: searchWords) {
             ApiIndexComment apiIndexComment=apiIndexCommentDao.find(s);
+            if (apiIndexComment==null){
+                continue;
+            }
             if (searchWordsCount.containsKey(apiIndexComment)){
                 searchWordsCount.put(apiIndexComment,searchWordsCount.get(apiIndexComment)+1);
             }else {

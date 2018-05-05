@@ -10,6 +10,7 @@ import com.entity.FuncIndex;
 import com.entity.FuncIndexCode;
 import com.util.StringUtil;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -20,18 +21,17 @@ public class Search {
 
     public static void main(String[] args) {
         Search search = new Search();
-        search.run();
+        Scanner scanner = new Scanner(System.in);
+        String searchSentence = scanner.nextLine();
+        search.run(searchSentence);
     }
 
     public String helloWorld(){
         return "Hello web";
     }
 
-    public List<Code> run(){
-        Scanner scanner = new Scanner(System.in);
-        String searchSentence = scanner.nextLine();
+    public List<Code> run(String searchSentence){
         String searchWords = disposeSearchWord(searchSentence);
-
         ApiNameSearch apiNameSearch = new ApiNameSearch();
         Map<Integer,Double> apiName = apiNameSearch.vsm(searchWords);
 
@@ -41,7 +41,6 @@ public class Search {
         Map<Integer, Double> apiRevevant = getApiRelevant(apiName, apiText);
         List<Code> queue=beginBooleanModel(apiRevevant,searchWords);
         return queue;
-
     }
 
     private String disposeSearchWord(String seachWord){
@@ -80,22 +79,31 @@ public class Search {
         Queue<FuncValue> funcValues = getQueue();
         for (Map.Entry<Integer,Double> entry: apiRevevant.entrySet()) {
             Doc doc = docDao.find(entry.getKey());
-            String[] funcSearchWords=deleteApiWords(doc.getSearchName().split(" "),searchWords.split(" "));
             List<Code> codes = docDao.findCodeByDocId(doc.getId());
+            String[] funcSearchWords=deleteApiWords(doc.getSearchName().split(" "),searchWords.split(" "));
             //目前先找出调用了这个API的函数有哪些，在这些函数中分别遍历，找那些需要搜索的单词，计算sim（or）并放回结果集中
             for (Code code: codes) {
                 List<Double> simOrValues = new ArrayList<Double>();
+                List<String> searchName = Arrays.asList(code.getSearchName().split(" "));
+                List<String> searchBody=Arrays.asList(code.getSearchBody().split(" "));
                 for (String word: funcSearchWords) {
                     FuncIndex funcIndex = funcIndexDao.find(word);
+                    if (funcIndex==null){
+                        continue;
+                    }
                     double wtdName=0;
                     double wtdBody=0;
-                    if(code.getSearchName().contains(word)){
+                    if(searchName.contains(word)){
                         FuncIndexCode funcIndexCode = funcIndexCodeDao.findByCodeAndFuncIndex(code.getId(), funcIndex.getId(),true);
-                        wtdName=0.5+0.5*funcIndexCode.getTermFrequency()*funcIndex.getNameIdf();
+                        if (funcIndexCode!=null){
+                            wtdName=0.5+0.5*funcIndexCode.getTermFrequency()*funcIndex.getNameIdf();
+                        }
                     }
-                    if (code.getSearchBody().contains(word)){
+                    if (searchBody.contains(word)){
                         FuncIndexCode funcIndexCode = funcIndexCodeDao.findByCodeAndFuncIndex(code.getId(), funcIndex.getId(),false);
-                        wtdBody=0.5+0.5*funcIndexCode.getTermFrequency()*funcIndex.getBodyIdf();
+                        if (funcIndexCode!=null){
+                            wtdBody=0.5+0.5*funcIndexCode.getTermFrequency()*funcIndex.getBodyIdf();
+                        }
                     }
                     double simOrValue=simOr(wtdName,wtdBody,1.5,1.0);
                     simOrValues.add(simOrValue);

@@ -20,15 +20,28 @@ public class ParseCode {
     private CompilationUnit compilationUnit;
     private String fileContent;
     private static Logger logger = LogManager.getLogger(ParseCode.class);
+    private ASTParser parser = ASTParser.newParser(AST.JLS9);
     public static void main(String[] args) {
 //        DaoUtil.truncateTable("code");
 //        DaoUtil.truncateTable("code_doc");
 //        DaoUtil.truncateTable("func_index");
 //        DaoUtil.truncateTable("func_index_code");
         ParseCode parseCode = new ParseCode();
-        //parseCode.parsePoject();
-        parseCode.run("F:\\codewarehouse\\elasticsearch\\modules\\lang-painless\\src\\main\\java\\org\\elasticsearch\\painless\\node\\EBinary.java","https:");
+        parseCode.parsePoject();
+
     }
+
+//    public static void main(String[] args) {
+//        ParseCode parseCode = new ParseCode();
+//        ProjectDao projectDao=new ProjectDao();
+//        Project project=projectDao.find("elasticsearch");
+//        List<File> files=parseCode.getFilesFromProject(project.getFilePath());
+//        File beginFile=new File("F:\\codewarehouse\\elasticsearch\\modules\\lang-painless\\src\\main\\java\\org\\elasticsearch\\painless\\node\\EBinary.java");
+//        int index=files.indexOf(beginFile);
+//        for (int i=index-1;i<files.size();i++) {
+//            parseCode.run(files.get(i).getAbsolutePath(),project.getBaseUrl());
+//        }
+//    }
 
     public void parsePoject(){
         ProjectDao projectDao=new ProjectDao();
@@ -50,6 +63,9 @@ public class ParseCode {
     public void run(String filepath,String bastUrl) {
         this.filePath = filepath;
         compilationUnit = getAst();
+        if (compilationUnit==null){
+            return;
+        }
         List types = compilationUnit.types();
         if (types.size() == 0) {
             return;
@@ -73,6 +89,9 @@ public class ParseCode {
 
     private boolean canSkip(TypeDeclaration typeDec) {
         ITypeBinding iTypeBinding = typeDec.resolveBinding();
+        if (iTypeBinding==null){
+            return true;
+        }
         boolean canSkip = false;
         canSkip |= Modifier.isAbstract(iTypeBinding.getModifiers());
         canSkip |= Modifier.isPrivate(iTypeBinding.getModifiers());
@@ -88,11 +107,19 @@ public class ParseCode {
         parser.setResolveBindings(true);
         parser.setBindingsRecovery(true);
         fileContent = readToString();
-
-
         parser.setSource(fileContent.toCharArray());
         parser.setResolveBindings(true);
-        return (CompilationUnit) parser.createAST(null);
+        ASTNode astNode=null;
+        try {
+            astNode=parser.createAST(null);
+        }catch (Exception e){
+            logger.error(e);
+        }
+        if (astNode!=null){
+            return (CompilationUnit)astNode;
+        }else{
+            return null;
+        }
     }
 
     private String readToString() {
