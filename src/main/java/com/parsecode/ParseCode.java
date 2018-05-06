@@ -22,10 +22,10 @@ public class ParseCode {
     private static Logger logger = LogManager.getLogger(ParseCode.class);
     private ASTParser parser = ASTParser.newParser(AST.JLS9);
     public static void main(String[] args) {
-//        DaoUtil.truncateTable("code");
-//        DaoUtil.truncateTable("code_doc");
-//        DaoUtil.truncateTable("func_index");
-//        DaoUtil.truncateTable("func_index_code");
+        DaoUtil.truncateTable("code");
+        DaoUtil.truncateTable("code_doc");
+        DaoUtil.truncateTable("func_index");
+        DaoUtil.truncateTable("func_index_code");
         ParseCode parseCode = new ParseCode();
         parseCode.parsePoject();
 

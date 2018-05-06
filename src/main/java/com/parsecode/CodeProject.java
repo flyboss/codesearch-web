@@ -32,39 +32,6 @@ public class CodeProject {
         codeProject.crawlProject();
     }
 
-
-
-    public void pullBranchToLocal(String remoteURL,String branch){
-        String projectName = remoteURL.substring(remoteURL.lastIndexOf("/")+1);
-        ProjectDao projectDao = new ProjectDao();
-        if(projectDao.find(projectName)!=null){
-            return;
-        }
-
-        File localPath = new File(projectRootPath+projectName);
-        if (localPath.exists()){
-            System.out.println(localPath+" exist");
-            logger.error(localPath+" exist");
-        }else{
-            if (localPath.mkdir()){
-                System.out.println(localPath+" mkdir");
-                logger.warn(localPath+" mkdir");
-            }
-        }
-        try {
-            Git result = Git.cloneRepository()
-                    .setURI(remoteURL+".git")
-                    .setDirectory(localPath)
-                    .call();
-            System.out.println(projectName+" succeed");
-            Project project=new Project(projectName,remoteURL+"/tree/"+branch+"/",projectRootPath+projectName);
-            projectDao.add(project);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println(projectName +" fail");
-        }
-    }
-
     private void crawlProject(){
         final String githubJava="/github.html";
         try {
@@ -83,6 +50,37 @@ public class CodeProject {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void pullBranchToLocal(String remoteURL,String branch){
+        String projectName = remoteURL.substring(remoteURL.lastIndexOf("/")+1);
+        ProjectDao projectDao = new ProjectDao();
+        if(projectDao.find(projectName)!=null){
+            return;
+        }
+
+        File localPath = new File(projectRootPath+projectName);
+        if (localPath.exists()){
+            System.out.println(localPath+" exist");
+            logger.error(localPath+" exist");
+        }else{
+            if (localPath.mkdir()){
+                System.out.println(localPath+" mkdir");
+                logger.info(localPath+" mkdir");
+            }
+        }
+        try {
+            Git result = Git.cloneRepository()
+                    .setURI(remoteURL+".git")
+                    .setDirectory(localPath)
+                    .call();
+            logger.info("download "+projectName+" succeed");
+            Project project=new Project(projectName,remoteURL+"/tree/"+branch+"/",projectRootPath+projectName);
+            projectDao.add(project);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("download "+projectName +" fail");
         }
     }
 }

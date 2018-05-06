@@ -63,21 +63,30 @@ public class CodeVisitor extends ASTVisitor {
         if (methodDeclaration == null) {
             return;
         }
-        String methodName = methodDeclaration.getName().toString();
-        //doc of the method
-        String doc = getMethodDoc(methodDeclaration);
-        int[] length = getMethodLength(methodDeclaration);
-        int starline = length[0];
-        int endline = length[1];
-        String originBody = getContent(starline, endline);
-
-        if (doc.length() + originBody.length() > 1000) {
+        String methodName;
+        int starline,endline;
+        String originBody;
+        String url;
+        String doc;
+        try{
+            methodName = methodDeclaration.getName().toString();
+            //doc of the method
+            doc = getMethodDoc(methodDeclaration);
+            int[] length = getMethodLength(methodDeclaration);
+            starline = length[0];
+            endline = length[1];
+            originBody = getContent(starline, endline);
+            if (doc.length() + originBody.length() > 1000) {
+                return;
+            }
+            String temp=filePath.replaceFirst("F:\\\\codewarehouse\\\\","");
+            temp=temp.substring(temp.indexOf("\\")+1);
+            url=baseUrl+temp.replaceAll("\\\\","/");
+        }catch (Exception e){
+            e.printStackTrace();
+            logger.error(e);
             return;
         }
-        String temp=filePath.replaceFirst("F:\\\\codewarehouse\\\\","");
-        temp=temp.substring(temp.indexOf("\\")+1);
-        String url=baseUrl+temp.replaceAll("\\\\","/");
-
         Code code = new Code(packageName, className, methodName, starline, endline, originBody, filePath, doc, docs,url);
         CodeDao codeDao = new CodeDao();
         codeDao.add(code);
@@ -108,8 +117,8 @@ public class CodeVisitor extends ASTVisitor {
             }
         }catch (Exception e){
             logger.error(e);
+            return false;
         }
-
         return true;
     }
 

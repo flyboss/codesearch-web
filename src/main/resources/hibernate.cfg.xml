@@ -19,12 +19,17 @@
     <!-- 数据库驱动 -->
     <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
     <!-- 连接数据库的url -->
-    <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/codesearch</property>
+    <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/codesearch?useSSL=false</property>
     <!-- 数据库用户名 -->
     <property name="hibernate.connection.username">root</property>
     <!-- 数据库密码 -->
     <property name="hibernate.connection.password">123456</property>
     <!-- 其他配置 -->
+    <property name="hibernate.hikari.connectionTimeout">20000</property>
+    <property name="hibernate.hikari.minimumIdle">5</property>
+    <property name="hibernate.hikari.maximumPoolSize">20</property>
+    <property name="hibernate.hikari.idleTimeout">300000</property>
+
     <!-- 格式化sql -->
     <property name="format_sql">true</property>
     <!-- 用来关联hbm配置文件 -->
