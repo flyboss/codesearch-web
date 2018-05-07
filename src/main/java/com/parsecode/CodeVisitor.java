@@ -30,14 +30,14 @@ public class CodeVisitor extends ASTVisitor {
     private String baseUrl;
     private static ExtractIndex extractIndex = new ExtractIndex();
 
-    public void setCodeVisitor(String packageName, String className, String filePath, CompilationUnit compilationUnit, String fileContent,String baseUrl) {
+    public void setCodeVisitor(String packageName, String className, String filePath, CompilationUnit compilationUnit, String fileContent, String baseUrl) {
         this.packageName = packageName;
         this.className = className;
         this.filePath = filePath;
         this.compilationUnit = compilationUnit;
         this.fileContent = fileContent.split("\n");
-        this.baseUrl=baseUrl;
-        System.out.println("\n" + filePath+"----------------------------------------------");
+        this.baseUrl = baseUrl;
+        System.out.println("\n" + filePath + "----------------------------------------------");
     }
 
     @Override
@@ -64,11 +64,11 @@ public class CodeVisitor extends ASTVisitor {
             return;
         }
         String methodName;
-        int starline,endline;
+        int starline, endline;
         String originBody;
         String url;
         String doc;
-        try{
+        try {
             methodName = methodDeclaration.getName().toString();
             //doc of the method
             doc = getMethodDoc(methodDeclaration);
@@ -79,15 +79,15 @@ public class CodeVisitor extends ASTVisitor {
             if (doc.length() + originBody.length() > 1000) {
                 return;
             }
-            String temp=filePath.replaceFirst("F:\\\\codewarehouse\\\\","");
-            temp=temp.substring(temp.indexOf("\\")+1);
-            url=baseUrl+temp.replaceAll("\\\\","/");
-        }catch (Exception e){
+            String temp = filePath.replaceFirst("F:\\\\codewarehouse\\\\", "");
+            temp = temp.substring(temp.indexOf("\\") + 1);
+            url = baseUrl + temp.replaceAll("\\\\", "/");
+        } catch (Exception e) {
             e.printStackTrace();
             logger.error(e);
             return;
         }
-        Code code = new Code(packageName, className, methodName, starline, endline, originBody, filePath, doc, docs,url);
+        Code code = new Code(packageName, className, methodName, starline, endline, originBody, filePath, doc, docs, url);
         CodeDao codeDao = new CodeDao();
         codeDao.add(code);
 
@@ -100,7 +100,6 @@ public class CodeVisitor extends ASTVisitor {
             if (methodDeclaration == null) {
                 return true;
             }
-            System.out.println("MethodInvocation:\t" + node.toString());
             List<Expression> expressions = node.arguments();
             String arguments = getArguments(expressions);
             String functionName = null;
@@ -115,8 +114,8 @@ public class CodeVisitor extends ASTVisitor {
             if (functionName != null) {
                 serachDoc(functionName, arguments.toString());
             }
-        }catch (Exception e){
-            logger.error(e);
+        } catch (Exception e) {
+            logger.error(filePath + " MethodInvocation " +node.toString()+" "+e);
             return false;
         }
         return true;
@@ -127,8 +126,8 @@ public class CodeVisitor extends ASTVisitor {
         for (Expression expression : expressions) {
             ITypeBinding expressionBinding = expression.resolveTypeBinding();
             if (expressionBinding != null) {
-                String name=expressionBinding.getName();
-                if (name!=null){
+                String name = expressionBinding.getName();
+                if (name != null) {
                     arguments.append(name + ", ");
                 }
             }
@@ -142,21 +141,25 @@ public class CodeVisitor extends ASTVisitor {
 
     @Override
     public void endVisit(ClassInstanceCreation node) {
-        if (methodDeclaration == null) {
-            return;
+        try {
+            if (methodDeclaration == null) {
+                return;
+            }
+            List<Expression> expressions = node.arguments();
+            String arguments = getArguments(expressions);
+            String className = null;
+            ITypeBinding typeBinding = node.resolveTypeBinding();
+            if (typeBinding != null) {
+                className = typeBinding.getPackage().getName() + "." + typeBinding.getName() + "." + node.getType().toString();
+                System.out.println(className);
+            }
+            if (className != null) {
+                serachDoc(className, arguments.toString());
+            }
+        }catch (Exception e){
+            logger.error(filePath+" ClassInstanceCreation:\t" + node.toString()+" "+e);
         }
-        System.out.println("ClassInstanceCreation:\t" + node.toString());
-        List<Expression> expressions = node.arguments();
-        String arguments = getArguments(expressions);
-        String className = null;
-        ITypeBinding typeBinding = node.resolveTypeBinding();
-        if (typeBinding != null) {
-            className = typeBinding.getPackage().getName() + "." + typeBinding.getName() + "." + node.getType().toString();
-            System.out.println(className);
-        }
-        if (className != null) {
-            serachDoc(className, arguments.toString());
-        }
+
     }
 
     @Override
@@ -175,7 +178,7 @@ public class CodeVisitor extends ASTVisitor {
     }
 
     private int[] getMethodLength(MethodDeclaration node) {
-        Block body=node.getBody();
+        Block body = node.getBody();
         int startline = compilationUnit.getLineNumber(body.getStartPosition());
         int nodeLength = body.getLength();
         int endline = compilationUnit.getLineNumber(body.getStartPosition() + nodeLength);

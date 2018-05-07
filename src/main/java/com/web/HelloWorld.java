@@ -3,6 +3,7 @@ package com.web;
 /**
  * Created by flyboss on 2018/4/28.
  */
+
 import com.Search.Search;
 import com.alibaba.fastjson.JSON;
 import com.entity.Code;
@@ -20,27 +21,34 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
-
 @WebServlet("/HelloWorld")
 public class HelloWorld extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        //设置响应内容类型
-        resp.setContentType("application/json; charset=utf-8");
-        resp.setCharacterEncoding("UTF-8");
-        //设置逻辑实现
-        Search search = new Search();
-        String searchWords=req.getParameter("searchWords");
-        searchWords=searchWords.replaceAll("/+"," ");
-        List<Code> codes = search.run(searchWords);
-        SampleFunc[] sampleFuncs=new SampleFunc[codes.size()];
-        for (int i = 0; i <codes.size() ; i++) {
-            sampleFuncs[i]=new SampleFunc(codes.get(i).getOriginBody(),codes.get(i).getUrl());
+        SampleFunc[] sampleFuncs=null;
+        try {
+            resp.setContentType("application/json; charset=utf-8");
+            resp.setCharacterEncoding("UTF-8");
+            Search search = new Search();
+            String searchWords = req.getParameter("searchWords");
+            searchWords = searchWords.replaceAll("/+", " ");
+            List<Code> codes = search.run(searchWords);
+            sampleFuncs = new SampleFunc[codes.size()];
+            for (int i = 0; i < codes.size(); i++) {
+                sampleFuncs[i] = new SampleFunc(codes.get(i).getOriginBody(), codes.get(i).getUrl());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         PrintWriter out = null;
         try {
             out = resp.getWriter();
-            out.write(JSON.toJSONString(sampleFuncs));
+            if (sampleFuncs==null||sampleFuncs.length==0){
+                out.write("");
+            }else{
+
+                out.write(JSON.toJSONString(sampleFuncs));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

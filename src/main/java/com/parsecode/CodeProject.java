@@ -27,6 +27,7 @@ public class CodeProject {
 
     private static final String projectRootPath="F:/codewarehouse/";
     private static final String javaUrl = "https://github.com/topics/java";
+    //presto has some problem
     public static void main(String[] args) {
         CodeProject codeProject = new CodeProject();
         codeProject.crawlProject();
@@ -64,6 +65,7 @@ public class CodeProject {
         if (localPath.exists()){
             System.out.println(localPath+" exist");
             logger.error(localPath+" exist");
+            return;
         }else{
             if (localPath.mkdir()){
                 System.out.println(localPath+" mkdir");

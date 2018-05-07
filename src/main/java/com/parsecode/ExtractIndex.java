@@ -24,11 +24,12 @@ public class ExtractIndex {
         funcIndexCodeDao = new FuncIndexCodeDao();
     }
 
+    //TODO 这部分代码有以下问题  1.idf 有大量空值   2.
     public static void main(String[] args) {
         ExtractIndex extractIndex = new ExtractIndex();
         CodeDao codeDao=new CodeDao();
         long codeCount=codeDao.getCodeCount();
-        extractIndex.setNameIdfOrBodyIdf(true,codeCount);
+        //extractIndex.setNameIdfOrBodyIdf(true,codeCount);
         extractIndex.setNameIdfOrBodyIdf(false,codeCount);
         System.out.println("finish");
     }
@@ -50,10 +51,19 @@ public class ExtractIndex {
         double maxIdf=funcIndexDao.findMaxIdf(isName);
         List<FuncIndex> funcIndices=funcIndexDao.getAll();
         for (FuncIndex funcIndex:funcIndices) {
+            //TODO 这里不应该有空值才对
             if (isName){
-                funcIndex.setNameIdf(funcIndex.getNameIdf()/maxIdf);
+                if (funcIndex.getNameIdf()==null){
+                    funcIndex.setNameIdf(0/maxIdf);
+                }else{
+                    funcIndex.setNameIdf(funcIndex.getNameIdf()/maxIdf);
+                }
             }else{
-                funcIndex.setBodyIdf(funcIndex.getBodyIdf()/maxIdf);
+                if (funcIndex.getBodyIdf()==null){
+                    funcIndex.setBodyIdf(0/maxIdf);
+                }else{
+                    funcIndex.setBodyIdf(funcIndex.getBodyIdf()/maxIdf);
+                }
             }
             funcIndexDao.update(funcIndex);
         }
