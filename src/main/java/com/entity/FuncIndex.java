@@ -19,10 +19,10 @@ public class FuncIndex {
     private String word;
 
     @Column(name = "name_idf")
-    private Double nameIdf;
+    private double nameIdf;
 
     @Column(name = "body_idf")
-    private Double bodyIdf;
+    private double bodyIdf;
 
     @OneToMany(mappedBy = "funcIndex")
     private Set<FuncIndexCode> funcIndexCodes = new HashSet<FuncIndexCode>();

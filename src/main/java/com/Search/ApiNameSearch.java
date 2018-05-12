@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Created by flyboss on 2018/4/23.
  */
-public class ApiNameSearch {
+public class ApiNameSearch implements ApiSearch{
 
     public Map<Integer,Double> vsm(String searchSentence){
         List<ApiIndexName> searchApiIndexName = new ArrayList<ApiIndexName>();

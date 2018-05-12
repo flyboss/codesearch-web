@@ -24,12 +24,11 @@ public class ExtractIndex {
         funcIndexCodeDao = new FuncIndexCodeDao();
     }
 
-    //TODO 这部分代码有以下问题  1.idf 有大量空值   2.
     public static void main(String[] args) {
         ExtractIndex extractIndex = new ExtractIndex();
         CodeDao codeDao=new CodeDao();
         long codeCount=codeDao.getCodeCount();
-        //extractIndex.setNameIdfOrBodyIdf(true,codeCount);
+        extractIndex.setNameIdfOrBodyIdf(true,codeCount);
         extractIndex.setNameIdfOrBodyIdf(false,codeCount);
         System.out.println("finish");
     }
@@ -50,8 +49,8 @@ public class ExtractIndex {
         FuncIndexDao funcIndexDao=new FuncIndexDao();
         double maxIdf=funcIndexDao.findMaxIdf(isName);
         List<FuncIndex> funcIndices=funcIndexDao.getAll();
+        //因为把name和body 存入了同一张表，所以有可能一个关键词在name上有值，但是在body上是空的
         for (FuncIndex funcIndex:funcIndices) {
-            //TODO 这里不应该有空值才对
             if (isName){
                 if (funcIndex.getNameIdf()==null){
                     funcIndex.setNameIdf(0/maxIdf);

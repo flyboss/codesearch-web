@@ -12,7 +12,7 @@ import java.util.*;
 /**
  * Created by flyboss on 2018/4/23.
  */
-public class ApiCommentSearch {
+public class ApiCommentSearch implements ApiSearch{
     public Map<Integer,Double> vsm(String searchSentence){
         List<ApiIndexComment> searchApiIndexComment = new ArrayList<ApiIndexComment>();
         double[] vector=generateVector(searchSentence,searchApiIndexComment);

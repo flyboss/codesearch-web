@@ -12,6 +12,7 @@ import com.util.StringUtil;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Created by flyboss on 2018/4/21.
@@ -32,15 +33,30 @@ public class Search {
 
     public List<Code> run(String searchSentence){
         String searchWords = disposeSearchWord(searchSentence);
-        ApiNameSearch apiNameSearch = new ApiNameSearch();
-        Map<Integer,Double> apiName = apiNameSearch.vsm(searchWords);
+        System.out.println("\n"+searchWords);
 
-        ApiCommentSearch apiCommentSearch = new ApiCommentSearch();
-        Map<Integer,Double> apiText = apiCommentSearch.vsm(searchWords);
-
-        Map<Integer, Double> apiRevevant = getApiRelevant(apiName, apiText);
+        Map<Integer, Double> apiRevevant=getApiRevevant(searchWords);
         List<Code> queue=beginBooleanModel(apiRevevant,searchWords);
         return queue;
+    }
+
+    private Map<Integer, Double> getApiRevevant(String searchSentence){
+        ApiNameSearch apiNameSearch = new ApiNameSearch();
+        ApiSearchThread apiNameSearchThread=new ApiSearchThread(apiNameSearch,searchSentence);
+        ApiCommentSearch apiCommentSearch = new ApiCommentSearch();
+        ApiSearchThread apiCommentSearchThread = new ApiSearchThread(apiCommentSearch, searchSentence);
+        ExecutorService executor = Executors.newCachedThreadPool();
+        Future<Map<Integer,Double>> apiName=executor.submit(apiNameSearchThread);
+        Future<Map<Integer,Double>> apiText=executor.submit(apiCommentSearchThread);
+
+        Map<Integer, Double> apiRevevant = null;
+        try {
+            apiRevevant = getApiRelevant(apiName.get(), apiText.get());
+            return apiRevevant;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private String disposeSearchWord(String seachWord){
@@ -77,11 +93,15 @@ public class Search {
         FuncIndexDao funcIndexDao = new FuncIndexDao();
         FuncIndexCodeDao funcIndexCodeDao = new FuncIndexCodeDao();
         Queue<FuncValue> funcValues = getQueue();
+
+        System.out.println("apiRevevant size: "+apiRevevant.size());
         for (Map.Entry<Integer,Double> entry: apiRevevant.entrySet()) {
             Doc doc = docDao.find(entry.getKey());
             List<Code> codes = docDao.findCodeByDocId(doc.getId());
             String[] funcSearchWords=deleteApiWords(doc.getSearchName().split(" "),searchWords.split(" "));
             //目前先找出调用了这个API的函数有哪些，在这些函数中分别遍历，找那些需要搜索的单词，计算sim（or）并放回结果集中
+
+            System.out.println("code: " + codes.size());
             for (Code code: codes) {
                 List<Double> simOrValues = new ArrayList<Double>();
                 List<String> searchName = Arrays.asList(code.getSearchName().split(" "));

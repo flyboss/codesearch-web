@@ -26,11 +26,16 @@ public class CodeProject {
     private static Logger logger = LogManager.getLogger(CodeProject.class);
 
     private static final String projectRootPath="F:/codewarehouse/";
-    private static final String javaUrl = "https://github.com/topics/java";
+
+    private ProjectDao projectDao;
     //presto has some problem
     public static void main(String[] args) {
         CodeProject codeProject = new CodeProject();
         codeProject.crawlProject();
+    }
+
+    public CodeProject(){
+        projectDao = new ProjectDao();
     }
 
     private void crawlProject(){
@@ -39,9 +44,15 @@ public class CodeProject {
             File file = new File(this.getClass().getResource(githubJava).getPath());
             Document doc = Jsoup.parse(file, "UTF-8", "https://github.com/");
             Elements articles = doc.select("article");
-            for (int i = 0; i < 100; i++) {
+            for (int i = 20; i < 101; i++) {
                 try{
                     String projectUrl=articles.get(i).child(0).child(0).child(0).absUrl("href");
+
+                    String projectName = projectUrl.substring(projectUrl.lastIndexOf("/")+1);
+                    if(projectDao.find(projectName)!=null){
+                        continue;
+                    }
+
                     Document project = Jsoup.connect(projectUrl).get();
                     String branch=project.getElementById("js-repo-pjax-container").child(1).child(0).child(4).child(2).child(0).child(1).text();
                     pullBranchToLocal(projectUrl,branch);
@@ -56,11 +67,6 @@ public class CodeProject {
 
     public void pullBranchToLocal(String remoteURL,String branch){
         String projectName = remoteURL.substring(remoteURL.lastIndexOf("/")+1);
-        ProjectDao projectDao = new ProjectDao();
-        if(projectDao.find(projectName)!=null){
-            return;
-        }
-
         File localPath = new File(projectRootPath+projectName);
         if (localPath.exists()){
             System.out.println(localPath+" exist");
@@ -76,6 +82,7 @@ public class CodeProject {
             Git result = Git.cloneRepository()
                     .setURI(remoteURL+".git")
                     .setDirectory(localPath)
+                    .setBranch(branch)
                     .call();
             logger.info("download "+projectName+" succeed");
             Project project=new Project(projectName,remoteURL+"/tree/"+branch+"/",projectRootPath+projectName);

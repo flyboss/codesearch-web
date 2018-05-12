@@ -1,5 +1,7 @@
 package com.main;
 
+import com.dao.FuncIndexDao;
+import com.entity.FuncIndex;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.hibernate.SessionFactory;
@@ -19,9 +21,9 @@ public class Main {
         sessionFactory=config.buildSessionFactory();
     }
     public static void main(String[] args){
-        System.out.println("Main.main");
-        //logger.info("dd");
-        logger.warn("dd");
+        FuncIndexDao funcIndexDao = new FuncIndexDao();
+        String s="adsfasdfasdfasdfa";
+        funcIndexDao.add(new FuncIndex(s));
     }
 
 }
