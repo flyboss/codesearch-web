@@ -3,7 +3,6 @@ package com.parsecode;
 import java.io.*;
 import java.util.*;
 
-import com.dao.DaoUtil;
 import com.dao.ProjectDao;
 import com.entity.Project;
 import org.apache.logging.log4j.LogManager;
@@ -60,7 +59,7 @@ public class ParseCode {
 
     }
 
-    public void run(String filepath,String bastUrl) {
+    public void run(String filepath,String baseUrl) {
         this.filePath = filepath;
         compilationUnit = getAst();
         if (compilationUnit==null){
@@ -83,7 +82,7 @@ public class ParseCode {
         className = typeDec.getName().getFullyQualifiedName();
 
         CodeVisitor codeVisitor = new CodeVisitor();
-        codeVisitor.setCodeVisitor(packageName, className, filePath, compilationUnit, fileContent,bastUrl);
+        codeVisitor.setCodeVisitor(packageName, className, filePath, compilationUnit, fileContent, baseUrl);
         compilationUnit.accept(codeVisitor);
     }
 
